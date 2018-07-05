@@ -20,7 +20,7 @@ BEGIN
 	PROCESS (nwe, clk, addr) 
 	BEGIN 
 		IF clk'event AND clk='1' THEN 
-			IF nwe='1' THEN 
+			IF nwe='0' THEN 
 				rammemory (conv_integer(addr))<=data_in; 
 			END IF; 
 		END IF; 
