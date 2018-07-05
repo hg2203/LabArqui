@@ -1,6 +1,5 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.all;
---USE ieee.numeric_std.all;
 USE IEEE.STD_LOGIC_UNSIGNED. all;
 
 ENTITY maq IS 
@@ -39,7 +38,7 @@ SIGNAL TempZz: STD_LOGIC;
 
 BEGIN 
 
-Mem: ENTITY work.mem	PORT MAP (	address=> PCr,
+Mem: ENTITY work.mem	PORT MAP (	address=> PC,
 											data=>Memdata
 										);
 										
@@ -83,7 +82,7 @@ ALU: ENTITY work.Alu PORT MAP (	r=>TempR,
 	END PROCESS;
 	Wout<=W;
 	Cout<=TempC;
-	PCout<= PC;
+	PCout<= TempS;
 	
 	PROCESS(estado)
 	BEGIN
@@ -99,7 +98,6 @@ ALU: ENTITY work.Alu PORT MAP (	r=>TempR,
 	
 	END PROCESS;
 	
-	
 	PROCESS (clk,prox_estado,Reset)
 		BEGIN 
 			IF(Reset='0') then
@@ -113,3 +111,4 @@ ALU: ENTITY work.Alu PORT MAP (	r=>TempR,
 	END PROCESS flipflop;
 
 END ARCHITECTURE;
+
