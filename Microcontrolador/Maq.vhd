@@ -22,6 +22,7 @@ TYPE tipo_estado IS (uno, dos, tres);
 SIGNAL estado: tipo_estado:=uno;
 SIGNAL prox_estado:tipo_estado;
 
+
 --registros 
 SIGNAL TempB: STD_LOGIC_VECTOR(7 DOWNTO 0);
 SIGNAL TempS: STD_LOGIC_VECTOR(3 DOWNTO 0);
