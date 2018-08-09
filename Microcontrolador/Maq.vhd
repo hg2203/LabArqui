@@ -51,7 +51,7 @@ BEGIN
 
 --Port MAP
 
-Mem: ENTITY work.mem	PORT MAP (	address=> PCr,
+Mem: ENTITY work.mem	PORT MAP (	address=> PC,
 											data=>Memdata
 										);
 										
@@ -68,7 +68,7 @@ RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
 											addr=> Temp_ram_addr,
 											data_out=> Temp_ram_dataout,
 											nwe=>Temp_ram_nwe,
-											clk=>Temp_ram_clk
+											clk=>clk
 										);
 
 	PROCESS(estado)		
@@ -109,10 +109,10 @@ RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
 							W<=TempR;
 							Temp_ram_nwe<='1';
 						ELSE
-							Temp_ram_nwe<='0';
+							Temp_ram_nwe<='1';
 						END IF;
 					ELSE
-					Temp_ram_nwe<='1';
+					Temp_ram_nwe<='0';
 					END IF;
 				prox_estado<= uno;
 				Cr<=TempC;
@@ -121,9 +121,12 @@ RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
 			END CASE;
 		END IF;
 	END PROCESS;
+	
 	Wout<=W;
 	Cout<=TempC;
 	PCout<= PC;
+	Temp_ram_addr<= IR(6 DOWNTO 0);
+	Temp_ram_datain<=TempR;
 	
 	PROCESS(estado)
 	BEGIN
@@ -147,8 +150,7 @@ RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
 			
 			ELSIF clk'event AND clk='1' THEN
 				estado<=prox_estado;
-			ELSIF clk'event AND clk='0' THEN
-				Temp_ram_clk<='0';
+				
 			END IF;
 			
 	END PROCESS flipflop;

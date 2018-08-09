@@ -25,6 +25,6 @@ BEGIN
 			END IF; 
 		END IF; 
 	END PROCESS; 
-	data_out<=rammemory(conv_integer(addr)); 
+ 	data_out<=rammemory(conv_integer(addr));
 
 END ARCHITECTURE; 
