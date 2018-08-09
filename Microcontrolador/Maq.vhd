@@ -26,19 +26,30 @@ SIGNAL prox_estado:tipo_estado;
 --registros 
 SIGNAL TempB: STD_LOGIC_VECTOR(7 DOWNTO 0);
 SIGNAL TempS: STD_LOGIC_VECTOR(3 DOWNTO 0);
-SIGNAL W: STD_LOGIC_VECTOR(7 DOWNTO 0);
 SIGNAL TempR: STD_LOGIC_VECTOR(7 DOWNTO 0);
 SIGNAL TempA: STD_LOGIC_VECTOR(7 DOWNTO 0);
-SIGNAL PC: STD_LOGIC_VECTOR(3 DOWNTO 0);
-SIGNAL PCr: STD_LOGIC_VECTOR(3 DOWNTO 0);
-SIGNAL Memdata: STD_LOGIC_VECTOR(11 DOWNTO 0);
-SIGNAL IR: STD_LOGIC_VECTOR (11 DOWNTO 0);
 SIGNAL TempC: STD_LOGIC;
-SIGNAL Cr: STD_LOGIC;
 SIGNAL TempZ: STD_LOGIC;
 SIGNAL TempZz: STD_LOGIC;
+SIGNAL Cr: STD_LOGIC;
+
+SIGNAL W: STD_LOGIC_VECTOR(7 DOWNTO 0);
+
+SIGNAL PC: STD_LOGIC_VECTOR(3 DOWNTO 0);
+SIGNAL PCr: STD_LOGIC_VECTOR(3 DOWNTO 0);
+
+SIGNAL Memdata: STD_LOGIC_VECTOR(13 DOWNTO 0);
+SIGNAL IR: STD_LOGIC_VECTOR (13 DOWNTO 0);
+
+SIGNAL Temp_ram_addr: STD_LOGIC_VECTOR (6 DOWNTO 0);
+SIGNAL Temp_ram_dataout: STD_LOGIC_VECTOR (7 DOWNTO 0);
+SIGNAL Temp_ram_datain: STD_LOGIC_VECTOR (7 DOWNTO 0);
+SIGNAL Temp_ram_nwe:  STD_LOGIC;
+SIGNAL Temp_ram_clk: STD_LOGIC;
 
 BEGIN 
+
+--Port MAP
 
 Mem: ENTITY work.mem	PORT MAP (	address=> PCr,
 											data=>Memdata
@@ -52,6 +63,13 @@ ALU: ENTITY work.Alu PORT MAP (	r=>TempR,
 											Ci=>Cr,
 											z=>TempZ
 										);
+										
+RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
+											addr=> Temp_ram_addr,
+											data_out=> Temp_ram_dataout,
+											nwe=>Temp_ram_nwe,
+											clk=>Temp_ram_clk
+										);
 
 	PROCESS(estado)		
 	BEGIN
@@ -62,23 +80,44 @@ ALU: ENTITY work.Alu PORT MAP (	r=>TempR,
 			Cr<='0';
 		ELSE
 			CASE (estado) IS 
+			
 				WHEN uno=>
 					IR<=Memdata;
+					Temp_ram_nwe<='1';
 					prox_estado<= dos;	
 				
-				WHEN dos=>
-					TempB<= IR(7 DOWNTO 0);
-					TempS<= IR (11 DOWNTO 8);
+				WHEN dos =>
+					TempS<=IR(11 DOWNTO 8);
+					IF IR (13 DOWNTO 12)<="11" THEN 
+						TempB<= IR(7 DOWNTO 0);
+					ELSIF IR (13 DOWNTO 12)<= "00" THEN 
+						TempB<= Temp_ram_dataout;
+					ELSE 
+						TempB<="00000000";
+					END IF; 
 					TempA<=W;
 					PCr<= PC + "0001"	;
+					Temp_ram_nwe<='1';
 					prox_estado<= tres;
-					
+		
 				WHEN tres=>
-					W<=TempR;
-					prox_estado<= uno;
-					Cr<=TempC;
-					TempZz<=TempZ;
-					PC<=PCr;
+					IF IR(13 DOWNTO 12)<="11" THEN 
+						W<=TempR;
+						Temp_ram_nwe<='1';
+					ELSIF IR(13 DOWNTO 12)<="00" THEN 
+						IF IR(7)<='0' THEN 
+							W<=TempR;
+							Temp_ram_nwe<='1';
+						ELSE
+							Temp_ram_nwe<='0';
+						END IF;
+					ELSE
+					Temp_ram_nwe<='1';
+					END IF;
+				prox_estado<= uno;
+				Cr<=TempC;
+				TempZz<=TempZ;
+				PC<=PCr;
 			END CASE;
 		END IF;
 	END PROCESS;
@@ -108,7 +147,8 @@ ALU: ENTITY work.Alu PORT MAP (	r=>TempR,
 			
 			ELSIF clk'event AND clk='1' THEN
 				estado<=prox_estado;
-				
+			ELSIF clk'event AND clk='0' THEN
+				Temp_ram_clk<='0';
 			END IF;
 			
 	END PROCESS flipflop;
