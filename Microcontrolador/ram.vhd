@@ -17,14 +17,15 @@ TYPE ram_table IS array (0 to 127) of std_logic_vector (7 downto 0);
 SIGNAL rammemory: ram_table; 
 
 BEGIN 
-	PROCESS (nwe, clk, addr) 
+	PROCESS ( nwe, clk, addr) 
 	BEGIN 
 		IF clk'event AND clk='0' THEN 
-			IF nwe='0' THEN 
+			IF  nwe='0' THEN 
 				rammemory (conv_integer(addr))<=data_in; 
 			END IF; 
 		END IF; 
+		data_out<=rammemory(conv_integer(addr));
 	END PROCESS; 
- 	data_out<=rammemory(conv_integer(addr));
+ 	
 
 END ARCHITECTURE; 

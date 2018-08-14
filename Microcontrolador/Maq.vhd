@@ -9,6 +9,7 @@ PORT( clk: IN STD_LOGIC;
 		Wout: OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
 		Cout: OUT STD_LOGIC;
 		estado_out: OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+		Z_out: OUT STD_LOGIC;
 		
 		m_out: OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
 		PCout: OUT STD_LOGIC_VECTOR(3 DOWNTO 0)
@@ -45,6 +46,7 @@ SIGNAL Temp_ram_addr: STD_LOGIC_VECTOR (6 DOWNTO 0);
 SIGNAL Temp_ram_dataout: STD_LOGIC_VECTOR (7 DOWNTO 0);
 SIGNAL Temp_ram_datain: STD_LOGIC_VECTOR (7 DOWNTO 0);
 SIGNAL Temp_ram_nwe:  STD_LOGIC;
+SIGNAL SubTemp_ram_nwe: STD_LOGIC; 
 SIGNAL Temp_ram_clk: STD_LOGIC;
 
 BEGIN 
@@ -67,7 +69,7 @@ ALU: ENTITY work.Alu PORT MAP (	r=>TempR,
 RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
 											addr=> Temp_ram_addr,
 											data_out=> Temp_ram_dataout,
-											nwe=>Temp_ram_nwe,
+											nwe=>SubTemp_ram_nwe,
 											clk=>clk
 										);
 
@@ -92,9 +94,11 @@ RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
 						TempB<= IR(7 DOWNTO 0);
 					ELSIF IR (13 DOWNTO 12)<= "00" THEN 
 						TempB<= Temp_ram_dataout;
+						
 					ELSE 
 						TempB<="00000000";
 					END IF; 
+					
 					TempA<=W;
 					PCr<= PC + "0001"	;
 					Temp_ram_nwe<='1';
@@ -108,26 +112,31 @@ RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
 						IF IR(7)<='0' THEN 
 							W<=TempR;
 							Temp_ram_nwe<='1';
+							
 						ELSE
-							Temp_ram_nwe<='1';
+							Temp_ram_nwe<='0';
+							
 						END IF;
 					ELSE
-					Temp_ram_nwe<='0';
+					Temp_ram_nwe<='1';
 					END IF;
+				SubTemp_ram_nwe<= Temp_ram_nwe;
 				prox_estado<= uno;
 				Cr<=TempC;
 				TempZz<=TempZ;
 				PC<=PCr;
+				
 			END CASE;
 		END IF;
+			
 	END PROCESS;
 	
 	Wout<=W;
 	Cout<=TempC;
 	PCout<= PC;
 	Temp_ram_addr<= IR(6 DOWNTO 0);
-	Temp_ram_datain<=TempR;
-	
+	Temp_ram_datain<=W;
+	Z_out<=TempZz;
 	PROCESS(estado)
 	BEGIN
 		CASE (estado) IS 
