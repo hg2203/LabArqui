@@ -127,8 +127,9 @@ RAM: ENTITY work.ram PORT MAP (	data_in=> Temp_ram_datain,
 				PC<=PCr;
 				
 			END CASE;
-		END IF;
 			
+		END IF;
+		
 	END PROCESS;
 	
 	Wout<=W;

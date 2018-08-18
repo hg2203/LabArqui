@@ -23,9 +23,10 @@ BEGIN
 			IF  nwe='0' THEN 
 				rammemory (conv_integer(addr))<=data_in; 
 			END IF; 
+			
 		END IF; 
 		data_out<=rammemory(conv_integer(addr));
+
 	END PROCESS; 
  	
-
 END ARCHITECTURE; 
